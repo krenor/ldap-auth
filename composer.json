@@ -1,0 +1,30 @@
+{
+  "name": "krenor/ldap-auth",
+  "description": "Basic readonly authentication via LDAP for Laravel 5.1",
+  "keywords": [
+    "laravel 5.1.11", "laravel", "laravel auth", "laravel authentication",
+    "ldap", "ldap authentication", "active directory",
+    "krenor"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Stanislav Goldmann",
+      "email": "stanislav.goldmann@gmail.com",
+      "role": "Developer",
+      "homepage": "https://github.com/krenor"
+    }
+  ],
+  "require": {
+    "laravel/framework": "~5.1.11",
+    "php": ">=5.5.9"
+  },
+  "require-dev": {
+    "phpunit/phpunit" : "4.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Krenor\\LdapAuth\\": "src/"
+    }
+  }
+}
