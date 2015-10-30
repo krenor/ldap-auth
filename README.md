@@ -48,7 +48,7 @@ It should look like this.
 
 return [
     'suffix' => '@example.local',
-    'domain_controller' => ['dns2.example.local', 'dns1.example.local],
+    'domain_controller' => ['dns2.example.local', 'dns1.example.local'],
     'base_dn' => 'OU=People,DC=example,DC=local',
     // Indicates to use the hostnames sequentially. This means that this package 
     // will try dns2.example.local first. If it's down, it tries the next one
