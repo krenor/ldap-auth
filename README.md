@@ -13,7 +13,7 @@ Add to your root composer.json and install with `composer install` or `composer 
 
     {
       require: {
-        "krenor/ldap-auth": "~1.0"
+        "krenor/ldap-auth": "~1.1"
       }
     }
 
@@ -48,18 +48,26 @@ It should look like this.
 
 return [
     'suffix' => '@example.local',
-    'domain_controller' => 'dns.example.local',
+    'domain_controller' => ['dns2.example.local', 'dns1.example.local],
     'base_dn' => 'OU=People,DC=example,DC=local',
-    'ssl' => false,	// if using TLS this MUST be false
-    'tls' => false, // // if using SSL this MUST be false
-    'admin_user' => 'admin', // Prevent anonymous bindings
-    'admin_pass' => 'admin' // Prevent anonymous bindings
+    // Indicates to use the hostnames sequentially. This means that this package 
+    // will try dns2.example.local first. If it's down, it tries the next one
+    // If this is set to false, load balancing will be used instead (random domain controller)
+    'backup_rebind' => true,
+    // if using TLS this MUST be false
+    'ssl' => false,
+    // if using SSL this MUST be false
+    'tls' => false,
+    // Prevent anonymous bindings
+    'admin_user' => 'admin',
+     // Prevent anonymous bindings
+    'admin_pass' => 'admin' 
 ];
 ```
 
-You may use an array of Domain Controllers instead of a single one.
+You may use a single domain controller or multiple ones. Enter them as array, not as string!
 ```php
-'domain_controller' => ['dns1.example.local', 'dns2.example.local']
+'domain_controller' => ['dns1.example.local']
 ```
 
 ## Usage

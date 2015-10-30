@@ -42,18 +42,23 @@ interface ConnectionInterface
     /**
      * Whether to automatically follow referrals returned by the LDAP server
      *
-     * @var boolean
+     * @var integer
      */
-    const REFERRALS = false;
+    const REFERRALS = 0;
+
+    /**
+     * Defines the time-out limit for connecting and binding in seconds
+     *
+     * @var integer
+     */
+    const TIMELIMIT = 6;
 
     /**
      * Connects the specified hostname to the LDAP server
      *
-     * @param string $hostname
-     *
      * @return resource
      */
-    public function connect($hostname);
+    public function connect();
 
     /**
      * Binds the LDAP connection to the server with login credentials

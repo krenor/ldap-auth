@@ -23,13 +23,6 @@ class Ldap {
     protected $base_dn;
 
     /**
-     * Array of domain controller(s) to balance LDAP queries
-     *
-     * @var array
-     */
-    protected $domain_controller = [];
-
-    /**
      * If no anonymous login is allowed
      *
      * @var string
@@ -92,11 +85,15 @@ class Ldap {
      */
     protected function connect(ConnectionInterface $connection)
     {
-        $dc = is_array($this->domain_controller) ? array_rand($this->domain_controller) : $this->domain_controller;
-        $this->ldap->connect($dc);
+        $this->ldap->connect();
 
         $this->ldap->option(LDAP_OPT_PROTOCOL_VERSION, $connection::PROTOCOL);
         $this->ldap->option(LDAP_OPT_REFERRALS, $connection::REFERRALS);
+        $this->ldap->option(LDAP_OPT_TIMELIMIT, $connection::TIMELIMIT);
+        $this->ldap->option(LDAP_OPT_NETWORK_TIMEOUT, $connection::TIMELIMIT);
+
+        // For debug purposes only!
+        // $this->ldap->option(LDAP_OPT_DEBUG_LEVEL, 7);
 
         $this->ldap->bind($this->admin_user, $this->admin_pass);
     }
