@@ -3,7 +3,9 @@
 
 # ldap-auth
 
-Very basic **READ ONLY** LDAP authentication driver for [Laravel 5.2+](http://laravel.com/)
+Very basic **READ ONLY** LDAP authentication driver for [Laravel 5.2+](http://laravel.com/)  
+
+Look **[HERE]**(https://github.com/krenor/ldap-auth/tree/1.1.0) for the package for Laravel 5.1
 
 ## Installation
 

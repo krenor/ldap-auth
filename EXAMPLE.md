@@ -90,14 +90,20 @@ use `required` on both username and password.
 
 # 2. Configure the routes
 
+Note: It is important to place these views in the 'web' middleware!  
+Otherwise sessions will not persist.
+
 ```php
 Route::get('/', function () {
 	return view('home');
 });
 
-Route::get('/login', 'AuthController@getLogin');
-Route::post('/login', 'AuthController@postLogin');
-Route::get('/logout', 'AuthController@getLogout');
+Route::group(['middleware' => ['web']], function () {
+    Route::get('/login', 'AuthController@getLogin');
+    Route::post('/login', 'AuthController@postLogin');
+    Route::get('/logout', 'AuthController@getLogout');
+});
+
 
 // Register your Routes to be accessed only with authentication
 Route::group(['middleware' => 'auth'], function () {
