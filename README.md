@@ -23,7 +23,7 @@ or use `composer require krenor/ldap-auth` in your console.
 
 Modify your `config/app.php` file and add the service provider to the providers array.
 
-    'Krenor\LdapAuth\LdapAuthServiceProvider::class,'
+    `Krenor\LdapAuth\LdapAuthServiceProvider::class,`
 
 
 ## Configuration
