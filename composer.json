@@ -2,7 +2,7 @@
   "name": "krenor/ldap-auth",
   "description": "Basic readonly authentication via LDAP for Laravel 5.1",
   "keywords": [
-    "laravel 5.1.11", "laravel", "laravel auth", "laravel authentication",
+    "laravel 5.2", "laravel", "laravel auth", "laravel authentication",
     "ldap", "ldap authentication", "active directory",
     "krenor"
   ],
@@ -16,7 +16,7 @@
     }
   ],
   "require": {
-    "laravel/framework": "~5.1.11",
+    "laravel/framework": "~5.2",
     "php": ">=5.5.9"
   },
   "require-dev": {
