@@ -1,61 +1,64 @@
 <?php
 
-namespace Krenor\LdapAuth;
+namespace Krenor\LdapAuth\Objects;
 
 use Krenor\LdapAuth\Connections\LdapConnection;
 use Krenor\LdapAuth\Contracts\ConnectionInterface;
+use Krenor\LdapAuth\Exceptions\EmptySearchResultException;
 use Krenor\LdapAuth\Exceptions\MissingConfigurationException;
 
-class Ldap {
+class Ldap
+{
 
     /**
-     * The account suffix for the domain domain
-     *
-     * @var string
-     */
-    protected $suffix;
-
-    /**
-     * The base distinguished name for the domain
-     *
-     * @var string
-     */
-    protected $base_dn;
-
-    /**
-     * If no anonymous login is allowed
-     *
-     * @var string
-     */
-    private $admin_user;
-
-    /**
-     * If no anonymous login is allowed
-     *
-     * @var string
-     */
-    private $admin_pass;
-
-    /**
-     * Current LDAP Connection
+     * The current LDAP Connection.
      *
      * @var LdapConnection
      */
     protected $ldap;
 
     /**
-     * Default fields to fetch a search or read by
-     *
-     * @var array
-     */
-    protected $fields = ['samaccountname', 'displayname', 'memberof'];
-
-    /**
-     * Default filter to execute a search query on
+     * The account suffix for the domain.
      *
      * @var string
      */
-    private $search_filter = "sAMAccountName";
+    protected $suffix;
+
+    /**
+     * The base distinguished name for the domain.
+     *
+     * @var string
+     */
+    protected $base_dn;
+
+    /**
+     * The filter to execute a search query on.
+     *
+     * @var string
+     */
+    private $search_filter;
+
+    /**
+     * The fields to fetch from a search result.
+     *
+     * @var array
+     */
+    protected $search_fields = [ ];
+
+    /**
+     * User with permissions for preventing anonymous bindings.
+     *
+     * @var string
+     */
+    private $admin_user;
+
+    /**
+     * Password of the user with permissions for preventing anonymous bindings.
+     *
+     * @var string
+     */
+    private $admin_pass;
+
 
     /**
      * Tries to connect and bind to the LDAP
@@ -75,6 +78,7 @@ class Ldap {
         $this->connect($this->ldap);
     }
 
+
     /**
      * Initializes the connecting parameters.
      * The actual connect happens with $this->ldap->bind()
@@ -92,40 +96,43 @@ class Ldap {
         $this->ldap->option(LDAP_OPT_TIMELIMIT, $connection::TIMELIMIT);
         $this->ldap->option(LDAP_OPT_NETWORK_TIMEOUT, $connection::TIMELIMIT);
 
-        // For debug purposes only!
+        // For debug purposes only.
         // $this->ldap->option(LDAP_OPT_DEBUG_LEVEL, 7);
 
         $this->ldap->bind($this->admin_user, $this->admin_pass);
     }
 
+
     /**
-     * Execute a search query in the entire LDAP tree
+     * Execute a search query in the LDAP Base DN.
      *
-     * @param string $filter msdn.microsoft.com/En-US/library/aa746475.aspx
-     * @param array $fields specific attributes to be returned. Defaults are set
-     * as $fields in this class. DN is always returned, no matter what.
+     * @param string $identifier msdn.microsoft.com/En-US/library/aa746475.aspx
+     * @param array  $fields     specific attributes to be returned
      *
-     * @return array $entry|null
+     * @return array $entry
+     * @throws EmptySearchResultException
      */
-    public function find($filter, array $fields = [])
+    public function find($identifier, array $fields = [ ])
     {
-        $results =  $this->ldap->search(
+        // Get all result entries
+        $results = $this->ldap->search(
             $this->base_dn,
-            $this->search_filter . '=' . $filter,
-            ($fields ? $fields : $this->fields)
+            $this->search_filter . '=' . $identifier,
+            ( $fields ?: $this->search_fields )
         );
 
-        if(count($results) > 0){
+        if (count($results) > 0) {
             $entry = $this->ldap->entry($results);
 
             // Returning a single LDAP entry
-            if(isset($entry[0]) && !empty($entry[0])) {
+            if (isset( $entry[0] ) && ! empty( $entry[0] )) {
                 return $entry[0];
             }
         }
 
-        return null;
+        throw new EmptySearchResultException;
     }
+
 
     /**
      * Rebinds with a given DN and Password
@@ -142,6 +149,7 @@ class Ldap {
         return $this->ldap->bind($username, $password);
     }
 
+
     /**
      * Bind configuration file to class properties
      * as long as these already exist
@@ -152,11 +160,11 @@ class Ldap {
      */
     private function bindConfig(array $config)
     {
-        foreach($config as $key => $value){
-            if(property_exists($this, $key) ){
+        foreach ($config as $key => $value) {
+            if (property_exists($this, $key)) {
                 $this->{$key} = $value;
                 // Remove config key
-                unset($config[$key]);
+                unset( $config[$key] );
             }
         }
 

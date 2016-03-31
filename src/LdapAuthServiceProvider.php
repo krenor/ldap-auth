@@ -5,15 +5,18 @@ namespace Krenor\LdapAuth;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 use Krenor\LdapAuth\Exceptions\MissingConfigurationException;
+use Krenor\LdapAuth\Objects\Ldap;
 
 class LdapAuthServiceProvider extends ServiceProvider
 {
+
     /**
      * Indicates if loading of the provider is deferred.
      *
      * @var bool
      */
     protected $defer = false;
+
 
     /**
      * Perform post-registration booting of services.
@@ -22,26 +25,34 @@ class LdapAuthServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // Register 'ldap' as authentication method
-        Auth::provider('ldap', function($app){
-            // Create new LDAP connection based on configuration files
-            $ldap = new Ldap( $this->getLdapConfig() );
+        $config = __DIR__ . '/config/ldap.php';
 
-            return new LdapAuthUserProvider(
-                $ldap, $app['config']['auth']['providers']['ldap-users']['model']
-            );
-        });
+        // Add publishable configuration
+        $this->publishes([
+            $config => config_path('ldap.php'),
+        ], 'ldap');
     }
 
+
     /**
-     * Register any package services.
+     * Register the service provider.
      *
      * @return void
      */
     public function register()
     {
-        //
+        // Register 'ldap' as authentication method
+        Auth::provider('ldap', function ($app) {
+
+            $model = $app['config']['auth']['providers']['ldap-users']['model'];
+
+            // Create a new LDAP connection
+            $connection = new Ldap($this->getLdapConfig());
+
+            return new LdapAuthUserProvider($connection, $model);
+        });
     }
+
 
     /**
      * Get the services provided by the provider.
@@ -50,8 +61,9 @@ class LdapAuthServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return ['auth'];
+        return [ 'auth' ];
     }
+
 
     /**
      * @return array
@@ -60,7 +72,7 @@ class LdapAuthServiceProvider extends ServiceProvider
      */
     private function getLdapConfig()
     {
-        if( is_array($this->app['config']['ldap']) ){
+        if (is_array($this->app['config']['ldap'])) {
             return $this->app['config']['ldap'];
         }
 

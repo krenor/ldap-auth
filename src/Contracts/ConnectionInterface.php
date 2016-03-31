@@ -84,12 +84,12 @@ interface ConnectionInterface
      * Searches in LDAP with the scope of LDAP_SCOPE_SUBTREE
      *
      * @param string $dn
-     * @param string $filter
+     * @param string $identifier
      * @param array $fields
      *
      * @return array
      */
-    public function search($dn, $filter, array $fields);
+    public function search($dn, $identifier, array $fields);
 
     /**
      * Check if connection is bound

@@ -5,7 +5,8 @@
 
 Very basic **READ ONLY** LDAP authentication driver for [Laravel 5.2+](http://laravel.com/)  
 
-Look [**HERE**](https://github.com/krenor/ldap-auth/tree/1.1.0) for the package for Laravel 5.1
+Look [**HERE**](https://github.com/krenor/ldap-auth/tree/1.1.0) for the package for Laravel 5.1.  
+However, only the 5.2 Version will be maintained.
 
 ## Installation
 
@@ -15,7 +16,7 @@ Add to your root composer.json and install with `composer install` or `composer 
 
     {
       require: {
-        "krenor/ldap-auth": "~2.0"
+        "krenor/ldap-auth": "~2.*"
       }
     }
 
@@ -25,8 +26,13 @@ or use `composer require krenor/ldap-auth` in your console.
 
 Modify your `config/app.php` file and add the service provider to the providers array.
 
-    `Krenor\LdapAuth\LdapAuthServiceProvider::class,`
+    Krenor\LdapAuth\LdapAuthServiceProvider::class,
+    
+### Step 3: Publish the configuration file by running:
 
+`php artisan vendor:publish --tag="ldap"`  
+
+Now you're all set!
 
 ## Configuration
 
@@ -57,37 +63,10 @@ Update your `config/auth.php` to use **ldap** as authentication and the **LdapUs
 ```
 
 
-### Step 2: Create an LDAP config
+### Step 2: Adjust the LDAP config to your needs
 
-Add a **ldap.php** to your config directory.
-It should look like this.
-
-```php
-<?php
-
-return [
-    'suffix' => '@example.local',
-    'domain_controller' => ['dns2.example.local', 'dns1.example.local'],
-    'base_dn' => 'OU=People,DC=example,DC=local',
-    // Indicates to use the hostnames sequentially. This means that this package 
-    // will try dns2.example.local first. If it's down, it tries the next one
-    // If this is set to false, load balancing will be used instead (random domain controller)
-    'backup_rebind' => true,
-    // if using TLS this MUST be false
-    'ssl' => false,
-    // if using SSL this MUST be false
-    'tls' => false,
-    // Prevent anonymous bindings
-    'admin_user' => 'admin',
-     // Prevent anonymous bindings
-    'admin_pass' => 'admin' 
-];
-```
-
-You may use a single domain controller or multiple ones. Enter them as array, not as string!
-```php
-'domain_controller' => ['dns1.example.local']
-```
+If you have run `php artisan vendor:publish --tag="ldap"` you should see the  
+ldap.php file in your config directory. Adjust the values as you need them.
 
 ## Usage
 

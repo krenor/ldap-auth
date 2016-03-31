@@ -1,6 +1,6 @@
 {
   "name": "krenor/ldap-auth",
-  "description": "Basic readonly authentication via LDAP for Laravel 5.1",
+  "description": "Basic readonly authentication via LDAP for Laravel 5.2",
   "keywords": [
     "laravel 5.2", "laravel", "laravel auth", "laravel authentication",
     "ldap", "ldap authentication", "active directory",

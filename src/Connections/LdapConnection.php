@@ -4,26 +4,26 @@ namespace Krenor\LdapAuth\Connections;
 
 use ErrorException;
 use Krenor\LdapAuth\Contracts\ConnectionInterface;
+use Krenor\LdapAuth\Contracts\DomainController;
 use Krenor\LdapAuth\Exceptions\ConnectionException;
 
 class LdapConnection implements ConnectionInterface
 {
 
     /**
-     * Array of domain controller(s) to balance LDAP queries
+     * Concrete strategy for getting the connection of the domain controllers
      *
-     * @var array
+     * @var DomainController
      */
-    protected $domainController = [ ];
+    protected $domainController;
 
     /**
-     * Indicates whether or not to use the array of domain controller sequentially
-     * So on downtime of a server it checks if the next    one can be reached.
-     * If this is set to false load balancing is used instead for multiple dc's
+     * Indicates whether backup rebinding should be used.
+     * If this is set to false load balancing is used instead.
      *
      * @var bool
      */
-    protected $useBackup = false;
+    protected $backup = false;
 
     /**
      * Indicates whether or not to use SSL
@@ -34,7 +34,6 @@ class LdapConnection implements ConnectionInterface
 
     /**
      * Indicates whether or not to use TLS
-     * If it's used ensure that ssl is set to false and vice-versa
      *
      * @var bool
      */
@@ -49,29 +48,24 @@ class LdapConnection implements ConnectionInterface
 
     /**
      * Indicates whether or not the current connection is bound
+     *
      * @var bool
      */
     protected $bound = false;
 
 
     /**
-     * Constructor
+     * LdapConnection constructor.
      *
      * @param array $config
      */
     public function __construct(array $config)
     {
-        $this->domainController = $config['domain_controller'];
+        $this->backup = $config['backup_rebind'];
+        $this->tls    = $config['tls'];
+        $this->ssl    = $config['ssl'];
 
-        if ($config['tls']) {
-            $this->tls = true;
-        }
-        if ($config['ssl']) {
-            $this->ssl = true;
-        }
-        if ($config['backup_rebind']) {
-            $this->useBackup = true;
-        }
+        $this->domainController = $this->getDomainControllerStrategy($config['domain_controller']);
     }
 
 
@@ -84,7 +78,7 @@ class LdapConnection implements ConnectionInterface
     {
         $port = $this->ssl ? $this::PORT_SSL : $this::PORT;
 
-        $hostname = $this->chooseDomainController();
+        $hostname = $this->domainController->getHostname();
 
         return $this->connection = ldap_connect($hostname, $port);
     }
@@ -120,40 +114,6 @@ class LdapConnection implements ConnectionInterface
 
 
     /**
-     * Chooses based on the configuration which domain controller to connect to
-     *
-     * @return string
-     */
-    private function chooseDomainController()
-    {
-        $protocol = $this->ssl ? $this::PROTOCOL_SSL : $this::PROTOCOL;
-        $count    = count($this->domainController);
-
-        if ($count === 1) {
-            // Single domain controller, so use this one
-            return $protocol . $this->domainController[0];
-        }
-
-        if ($this->useBackup === true) {
-            $connectionString = null;
-
-            foreach ($this->domainController as $dc) {
-                $connectionString .= $protocol . $dc . ' ';
-            }
-
-            // In case of using backup_rebind we have to build a string of all
-            // domain controller which will be walked through sequentially
-            return $connectionString;
-        }
-
-        $loadBalancedDC = $this->domainController[array_rand($this->domainController)];
-
-        // Otherwise use "load balancing" by using a random domain controller
-        return $protocol . $loadBalancedDC;
-    }
-
-
-    /**
      * @param $option
      * @param $value
      *
@@ -176,14 +136,14 @@ class LdapConnection implements ConnectionInterface
 
     /**
      * @param string $dn
-     * @param string $filter
+     * @param string $identifier
      * @param array  $fields
      *
      * @return resource
      */
-    public function search($dn, $filter, array $fields)
+    public function search($dn, $identifier, array $fields)
     {
-        return ldap_search($this->connection, $dn, $filter, $fields);
+        return ldap_search($this->connection, $dn, $identifier, $fields);
     }
 
 
@@ -231,6 +191,29 @@ class LdapConnection implements ConnectionInterface
     public function connection()
     {
         return $this->connection;
+    }
+
+
+    /**
+     * Get the concrete strategy class for retrieving the hostname.
+     *
+     * @param array $domain_controller
+     *
+     * @return \Krenor\LdapAuth\Connections\DomainController
+     */
+    private function getDomainControllerStrategy(array $domain_controller)
+    {
+        $protocol = $this->ssl ? $this::PROTOCOL_SSL : $this::PROTOCOL;
+
+        if (count($domain_controller) === 1) {
+            return new SingleDomainController($protocol, $domain_controller);
+        }
+
+        if ($this->backup === true) {
+            return new RebindDomainController($protocol, $domain_controller);
+        } else {
+            return new LoadBalancingDomainController($protocol, $domain_controller);
+        }
     }
 
 }

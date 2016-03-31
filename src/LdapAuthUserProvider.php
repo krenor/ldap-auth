@@ -8,14 +8,14 @@ use Illuminate\Contracts\Auth\Authenticatable;
 class LdapAuthUserProvider implements UserProvider
 {
     /**
-     * LDAP Object
+     * LDAP Wrapper.
      *
-     * @var object
+     * @var Ldap
      */
     protected $ldap;
 
     /**
-     * Auth User Class
+     * LDAP Auth User Class.
      *
      * @var string
      */

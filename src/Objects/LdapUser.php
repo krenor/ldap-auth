@@ -149,12 +149,13 @@ class LdapUser implements UserContract, AuthorizableContract, LdapUserContract
     private function buildAttributesFromLdap($entry)
     {
         $this->attributes['display_name']   = $entry['displayname'][0];
-        $this->attributes['samaccountname'] = $entry['samaccountname'][0];
-        $this->attributes['dn']             = $entry['dn'];
-        $this->attributes['member_of']      = $entry['memberof'];
 
-        // Just for readability, unsetting count as we only fetch one user
-        unset( $this->attributes['member_of']['count'] );
+        // Set the attributes accordingly to the search fields given
+        foreach($entry as $index => $key){
+            if(array_key_exists($index, config('ldap.search_fields'))){
+                $this->attributes[$key] = isset($entry[$key][1]) ? $entry[$key] : $entry[$key][0];
+            }
+        };
     }
 
 
