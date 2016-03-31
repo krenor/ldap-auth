@@ -4,6 +4,7 @@ namespace Krenor\LdapAuth;
 
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Krenor\LdapAuth\Objects\Ldap;
 
 class LdapAuthUserProvider implements UserProvider
 {
