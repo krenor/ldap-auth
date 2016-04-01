@@ -1,7 +1,7 @@
 # 1. Create an AuthController
 
 Create your Authentication Controller manually or use
-`php artisan make:controller AuthController`
+`php artisan make:controller LdapAuthController`
 
 
 ```php
@@ -9,44 +9,18 @@ Create your Authentication Controller manually or use
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\LoginRequest;
-use Illuminate\Contracts\Auth\Guard;
-use Krenor\LdapAuth\Objects\LdapUser;
+use Illuminate\Http\Request;
+use App\Http\Requests;
 
 class AuthController extends Controller
 {
-    /**
-     * the model instance
-     *
-     * @var User
-     */
-    protected $user;
-
-    /**
-     * The Guard implementation.
-     *
-     * @var Authenticator
-     */
-    protected $auth;
-
-    /**
-     * Create a new authentication controller instance.
-     *
-     * @param Authenticator|Guard $auth
-     * @param LdapUser $user
-     */
-    public function __construct(Guard $auth, LdapUser $user)
-    {
-        $this->auth = $auth;
-        $this->user = $user;
-    }
-
+    
     /**
      * Show the application login form.
      *
      * @return Response
      */
-    public function getLogin()
+    public function getLoginForm()
     {
         return view('login');
     }
@@ -54,13 +28,19 @@ class AuthController extends Controller
     /**
      * Handle a login request to the application.
      *
-     * @param LoginRequest $request
+     * @param Request $request
      *
      * @return Response
      */
-    public function postLogin(LoginRequest $request)
+    public function login(Request $request)
     {
-        if ( $this->auth->attempt( $request->only('username', 'password') ) ) {
+    	// Validate credentials
+    	$this->validate($request, [
+            'username' => 'required',
+            'password' => 'required',
+        ]);
+        
+        if ( auth()->attempt( $request->only('username', 'password') ) ) {
             // Redirect to indented page or fall back to index page
             return redirect()->intended('/');
         }
@@ -77,16 +57,13 @@ class AuthController extends Controller
      */
     public function getLogout()
     {
-        $this->auth->logout();
+        auth()->logout();
 
         return redirect('/');
     }
 }
 
 ```
-
-You can create your own request rules as mine basically
-use `required` on both username and password.
 
 # 2. Configure the routes
 
