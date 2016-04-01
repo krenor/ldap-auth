@@ -16,7 +16,7 @@ Add to your root composer.json and install with `composer install` or `composer 
 
     {
       require: {
-        "krenor/ldap-auth": "~2.*"
+        "krenor/ldap-auth": "~2.1"
       }
     }
 
@@ -30,7 +30,7 @@ Modify your `config/app.php` file and add the service provider to the providers 
     
 ### Step 3: Publish the configuration file by running:
 
-`php artisan vendor:publish --tag="ldap"`  
+`php artisan vendor:publish`  
 
 Now you're all set!
 
@@ -65,7 +65,7 @@ Update your `config/auth.php` to use **ldap** as authentication and the **LdapUs
 
 ### Step 2: Adjust the LDAP config to your needs
 
-If you have run `php artisan vendor:publish --tag="ldap"` you should see the  
+If you have run `php artisan vendor:publish` you should see the  
 ldap.php file in your config directory. Adjust the values as you need them.
 
 ## Usage
