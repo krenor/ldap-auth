@@ -91,7 +91,7 @@ class Ldap
     {
         $this->ldap->connect();
 
-        $this->ldap->option(LDAP_OPT_PROTOCOL_VERSION, $connection::PROTOCOL);
+        $this->ldap->option(LDAP_OPT_PROTOCOL_VERSION, $connection::VERSION);
         $this->ldap->option(LDAP_OPT_REFERRALS, $connection::REFERRALS);
         $this->ldap->option(LDAP_OPT_TIMELIMIT, $connection::TIMELIMIT);
         $this->ldap->option(LDAP_OPT_NETWORK_TIMEOUT, $connection::TIMELIMIT);
