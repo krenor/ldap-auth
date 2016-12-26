@@ -151,9 +151,9 @@ class LdapUser implements UserContract, AuthorizableContract, LdapUserContract
         $this->attributes['dn']   = $entry['dn'];
 
         // Set the attributes accordingly to the search fields given
-        foreach($entry as $index => $key){
+        foreach($entry as $index => $value){
             if(array_key_exists($index, config('ldap.search_fields'))){
-                $this->attributes[$key] = isset($entry[$key][1]) ? $entry[$key] : $entry[$key][0];
+                $this->attributes[$index] = isset($value[1]) ? $value : $value[0];
             }
         };
     }
