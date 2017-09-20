@@ -2,31 +2,28 @@
 
 namespace Krenor\LdapAuth;
 
-use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Krenor\LdapAuth\Objects\Ldap;
+use Illuminate\Contracts\Auth\UserProvider;
 
 class LdapAuthUserProvider implements UserProvider
 {
     /**
-     * LDAP Wrapper.
-     *
      * @var Ldap
      */
     protected $ldap;
 
     /**
-     * LDAP Auth User Class.
-     *
      * @var string
      */
     protected $model;
 
     /**
+     * LdapAuthUserProvider constructor.
+     *
      * @param Ldap $ldap
      * @param string $model
      */
-    public function __construct(Ldap $ldap, $model)
+    public function __construct(Ldap $ldap, string $model)
     {
         $this->ldap = $ldap;
         $this->model = $model;
@@ -36,7 +33,8 @@ class LdapAuthUserProvider implements UserProvider
      * Retrieve a user by their unique identifier.
      *
      * @param  mixed $identifier
-     * @return \Illuminate\Contracts\Auth\Authenticatable|null
+     *
+     * @return LdapUser|null
      */
     public function retrieveById($identifier)
     {
@@ -50,59 +48,58 @@ class LdapAuthUserProvider implements UserProvider
      *
      * @param  mixed $identifier
      * @param  string $token
-     * @return \Illuminate\Contracts\Auth\Authenticatable|null
+     *
+     * @return null
      */
     public function retrieveByToken($identifier, $token)
     {
-        // this shouldn't be needed as user / password is in ldap
+        return null;
     }
 
     /**
      * Update the "remember me" token for the given user in storage.
      *
-     * @param  \Illuminate\Contracts\Auth\Authenticatable $user
+     * @param  Authenticatable $user
      * @param  string $token
-     * @return void
+     *
+     * @return null
      */
     public function updateRememberToken(Authenticatable $user, $token)
     {
-        // this shouldn't be needed as user / password is in ldap
+        return null;
     }
 
     /**
      * Retrieve a user by the given credentials.
      *
      * @param  array $credentials
-     * @return \Krenor\LdapAuth\Objects\LdapUser|null
+     *
+     * @return LdapUser
      */
     public function retrieveByCredentials(array $credentials)
     {
-        $username = $credentials['username'];
-        $result = $this->ldap->find($username);
+        $result = $this->ldap->search($credentials['username']);
 
-        if( !is_null($result) ){
-            $user = new $this->model;
-            $user->build( $result );
-
-            return $user;
-        }
-
-        return null;
+        return new $this->model($result);
     }
 
     /**
      * Validate a user against the given credentials.
      *
-     * @param  \Illuminate\Contracts\Auth\Authenticatable $user
+     * @param  Authenticatable $user
      * @param  array $credentials
+     *
      * @return bool
      */
     public function validateCredentials(Authenticatable $user, array $credentials)
     {
-        return $this->ldap->auth(
-            $user->dn,
+        if (!$user instanceof LdapUser) {
+            return false;
+        }
+
+        return $this->ldap->bind(
+            $user->distinguishedName,
             $credentials['password']
         );
     }
-
 }

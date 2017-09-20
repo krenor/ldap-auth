@@ -2,10 +2,8 @@
 
 namespace Krenor\LdapAuth;
 
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
-use Krenor\LdapAuth\Exceptions\MissingConfigurationException;
-use Krenor\LdapAuth\Objects\Ldap;
+use Illuminate\Support\Facades\Auth;
 
 class LdapAuthServiceProvider extends ServiceProvider
 {
@@ -25,7 +23,7 @@ class LdapAuthServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $config = __DIR__ . '/config/ldap.php';
+        $config = __DIR__ . '/config.php';
 
         // Add publishable configuration
         $this->publishes([
@@ -41,15 +39,12 @@ class LdapAuthServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        // Register 'ldap' as authentication method
         Auth::provider('ldap', function ($app) {
+            $model = config('auth.providers.ldap-users.model');
 
-            $model = $app['config']['auth']['providers']['ldap-users']['model'];
+            $ldap = new Ldap($app['config']['ldap']);
 
-            // Create a new LDAP connection
-            $connection = new Ldap($this->getLdapConfig());
-
-            return new LdapAuthUserProvider($connection, $model);
+            return new LdapAuthUserProvider($ldap, $model);
         });
     }
 
@@ -61,22 +56,6 @@ class LdapAuthServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return [ 'auth' ];
+        return ['auth'];
     }
-
-
-    /**
-     * @return array
-     *
-     * @throws MissingConfigurationException
-     */
-    private function getLdapConfig()
-    {
-        if (is_array($this->app['config']['ldap'])) {
-            return $this->app['config']['ldap'];
-        }
-
-        throw new MissingConfigurationException();
-    }
-
 }
